@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cute Cats Gallery 🐾</title>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <style>
+    :root {
+      --primary-color: #ff6b6b;
+      --secondary-color: #4ecdc4;
+      --background-color: #f0f4f8;
+      --card-bg-color: #ffffff;
+      --text-color: #333;
+      --shadow-light: 0 4px 12px rgba(0, 0, 0, 0.08);
+      --shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.15);
+    }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: var(--background-color);
+      color: var(--text-color);
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .container {
+      width: 90%;
+      max-width: 1200px;
+      padding: 20px;
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+      padding: 20px;
+      border-bottom: 3px solid var(--primary-color);
+    }
+    .header h2 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: var(--primary-color);
+      margin: 0;
+    }
+    .header p {
+      font-size: 1rem;
+      color: #777;
+      margin-top: 5px;
+    }
+    .controls {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    #refreshBtn {
+      background-color: var(--secondary-color);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      font-size: 1rem;
+      border-radius: 25px;
+      cursor: pointer;
+      box-shadow: var(--shadow-light);
+      transition: all 0.3s ease;
+      font-weight: bold;
+    }
+    #refreshBtn:hover {
+      background-color: #3aa098;
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-hover);
+    }
+    #refreshBtn:active {
+      transform: translateY(0);
+    }
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+    }
+    .card {
+      background: var(--card-bg-color);
+      border-radius: 15px;
+      overflow: hidden;
+      box-shadow: var(--shadow-light);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      position: relative;
+    }
+    .card:hover {
+      transform: translateY(-5px) scale(1.02);
+      box-shadow: var(--shadow-hover);
+    }
+    .card img {
+      width: 100%;
+      height: 250px;
+      object-fit: cover;
+      display: block;
+      border-radius: 15px 15px 0 0;
+    }
+    .loading-spinner {
+      border: 4px solid rgba(0, 0, 0, 0.1);
+      border-top: 4px solid var(--primary-color);
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 50px auto;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h2>🐾 Cats Gallery</h2>
+    </div>
+
+    <div id="loadingSpinner" class="loading-spinner" style="display: none;"></div>
+    <div class="gallery" id="catsGallery"></div>
+  </div>
+
+  <script>
+    const gallery = document.getElementById("catsGallery");
+    const refreshBtn = document.getElementById("refreshBtn");
+    const loadingSpinner = document.getElementById("loadingSpinner");
+
+    const fetchCats = () => {
+      gallery.innerHTML = '';
+      loadingSpinner.style.display = 'block';
+
+      axios.get("https://api.thecatapi.com/v1/images/search?limit=10")
+        .then(response => {
+          loadingSpinner.style.display = 'none';
+          const cats = response.data;
+          if (cats.length > 0) {
+            cats.forEach(cat => {
+              const card = document.createElement('div');
+              card.classList.add('card');
+              card.innerHTML = `<img src="${cat.url}" alt="Cute Cat">`;
+              gallery.appendChild(card);
+            });
+          } else {
+            gallery.innerHTML = '<p style="text-align: center; color: #888;">No cats found. Please try again.</p>';
+          }
+        })
+        .catch(error => {
+          loadingSpinner.style.display = 'none';
+          gallery.innerHTML = `<p style="text-align: center; color: var(--primary-color);">Failed to fetch cats. Please check your network connection.</p>`;
+          console.error("Error fetching cats:", error);
+        });
+    };
+    window.addEventListener('load', fetchCats);
+
+
+    refreshBtn.addEventListener('click', fetchCats);
+  </script>
+</body>
+</html>
